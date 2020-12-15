@@ -1,0 +1,52 @@
+// This is a fork of fireflies
+// added colours. Doesn't necessarily work well, but it  works
+
+sparkHue = .05;
+sparkSaturation = 0.9;
+numSparks = 1 + (pixelCount / 10);
+decay = 0.995 ;
+maxSpeed = 0.4
+newThreshhold = 0.01
+
+sparks = array(numSparks);
+sparkX = array(numSparks);
+pixels = array(pixelCount);
+hues = array(numSparks);
+hue_pixels = array(pixelCount);
+
+for (i=0;i<numSparks;i++) {
+  hues[i] = i*(1/numSparks);
+}
+
+export function beforeRender(delta) {
+  delta *= .1;
+  
+  for (i = 0; i < pixelCount; i++)
+    pixels[i] = pixels[i] * 0.9;
+  
+  for (i = 0; i < numSparks; i++) {
+    if (sparks[i] >= -newThreshhold && sparks[i] <= newThreshhold) {
+      sparks[i] = (maxSpeed/2) - random(maxSpeed);
+      sparkX[i] = random(pixelCount);
+    }
+    
+    sparks[i] *= decay;
+    sparkX[i] += sparks[i] *  delta;
+    
+    if (sparkX[i] >= pixelCount) {
+      sparkX[i] = 0;
+    }
+    
+    if (sparkX[i] < 0) {
+      sparkX[i] = pixelCount - 1;
+    }
+    
+    pixels[floor(sparkX[i])] += sparks[i];
+    hue_pixels[floor(sparkX[i])] = hues[i];
+  }
+}
+
+export function render(index) {
+  v = pixels[index];
+  hsv(hue_pixels[index], sparkSaturation, v * v * 10)
+}
